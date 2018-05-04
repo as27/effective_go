@@ -108,4 +108,25 @@ $ godoc regexp | grep parse
 $
 ```
 
-Die Go Syntax erlaubt es Deklarationen zu gruppieren.
+Die Go Syntax erlaubt es Deklarationen zu gruppieren. Ein doc Kommentar kann so eine Gruppe von Variablen oder Konstanten beschreiben. Da hierdurch mehrere Deklarationen beschrieben werden ist so ein Kommentar eher oberflächlich.
+
+```go
+// Error codes returned by failures to parse an expression.
+var (
+    ErrInternal      = errors.New("regexp: internal error")
+    ErrUnmatchedLpar = errors.New("regexp: unmatched '('")
+    ErrUnmatchedRpar = errors.New("regexp: unmatched ')'")
+    ...
+)
+```
+
+So eine Gruppierung kann auch eine Beziehung zwischen den einzelnen Elementen ausdrücken, wie z.B. dass mehrere Variablen durch ein mutex geschützt werden.
+
+```go
+var (
+    countLock   sync.Mutex
+    inputCount  uint32
+    outputCount uint32
+    errorCount  uint32
+)
+```
