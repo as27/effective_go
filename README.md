@@ -130,3 +130,13 @@ var (
     errorCount  uint32
 )
 ```
+
+## Namen
+
+### Packet Namen
+
+### Getters
+
+### Interface Namen
+
+### MixedCaps
