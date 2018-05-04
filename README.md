@@ -1,6 +1,6 @@
 # effective_go
 
-Dies ist eine inoffizielle Übersetzung von [Effective Go](https://golang.org/doc/effective_go.html).
+Dies ist eine inoffizielle Übersetzung von [Effective Go](https://golang.org/doc/effective_go.html). Die Code Beispiele wurden aus der Originalfassung verwendet.
 
 ## Formatierung
 
@@ -16,6 +16,7 @@ type T struct {
     value int // its value
 }
 ```
+
 `gofmt`richtet hier die einzelnen Spalten aus:
 
 ```go
@@ -36,4 +37,75 @@ Ein paar Details sind jedoch weiterhin offen:
 ```go
 x<<8 + y<<16
 ```
+
 berechnet sich, wie es die Leerzeichen definieren.
+
+## Kommentare
+
+Go verwendet C-Stil /* */ Block Kommentare und C++ Stil // Zeilen-Kommentare. Zeilen-Kommentare sind die Norm, wobei Block-Kommentare meistens als Packet Dokumentation verwendet werden. Diese sind jedoch auch innerhalb eines Ausdruckes nützlich oder um größere Bereiche von Code zu deaktivieren.
+
+Das Programm - und Webserver - `godoc` geht durch die Go Quelldateien und erzeugt daraus eine Dokumentation für das jeweilige Packet. Der Kommentar, welcher vor der jeweiligen Deklaration von exportierten Elementen steht, wird als Beschreibung für das Element in der Dokumentation verwendet. Die Art und Weise wie diese Kommentare gestaltet wurden ist ausschlaggebend für die Qualität der Dokumentation welche `godoc` erzeugt.
+
+Für jedes Packet sollte einen _Packet Kommentar_ erstellt werden, welcher vor der Packet Deklaration steht. Für Packete mit mehr als einer Datei muss der Packet Kommentar nur in einem File definiert werden, dabei ist es egal in welcher Datei dieser steht. Der Packet Kommentar soll das Packet vorstellen und Informationen zu der Idee hinter dem Packet geben. Dieser wird als erstes auf der `godoc` Seite dargestellt und soll eine Einleitung für die folgende Detailierte Dokumentation der einzelnen Funktionen sein.
+
+```go
+/*
+Package regexp implements a simple library for regular expressions.
+
+The syntax of the regular expressions accepted is:
+
+    regexp:
+        concatenation { '|' concatenation }
+    concatenation:
+        { closure }
+    closure:
+        term [ '*' | '+' | '?' ]
+    term:
+        '^'
+        '$'
+        '.'
+        character
+        '[' [ '^' ] character-ranges ']'
+        '(' regexp ')'
+*/
+package regexp
+```
+
+Bei einfachen Packeten kann dieser Kommentar auch wie folgt aussehen:
+
+```go
+// Package path implements utility routines for
+// manipulating slash-separated filename paths.
+```
+
+Kommentare benötigen keine extra Formatelemente wie zum Beispiel ein Banner aus Sternen. Der generierte Output hat auch keine feste Breite, so dass keine Leerzeichen für eine Ausrichtung der Kommentare verwendet werden sollten. `godoc` kümmert sich darum. Die Kommentare werden als reiner Text interpretiert, deshalb sollte kein HTML oder andere Notierungen wie `_this_` benutzt werden, da diese exakt so wieder gegeben werden. Es gibt an der Stelle eine Ausnahme, welche durch `godoc`durchgeführt wird. Eingerückter Text wird mit einer nichtproportionalien Schriftart (Festbreitenschrift) dargestellt, welche für Code Schnipsel verwendet werden kann. Der Packet Kommentar für das [fmt package](https://golang.org/pkg/fmt/) verwendet diesen Effekt.
+
+Abhängig von dem jeweiligen Kontext kann es passieren, dass die Kommentare durch `godoc` nichtmal neu formatiert werden, deshalb sollte sichergestellt sein, dass diese gut aussehen. Das bedeutet: verwende eine korrekte Rechtschreibung, Punktuation, Satzstruktur und breche längere Zeilen um.
+
+Innerhalb eines Packets wird jeder Kommentar überhalb einer Deklaration als doc Kommentar (Dokumentation Kommentar) dargestellt. Jedes exportierte Element sollte deshalb ein doc Kommentar besitzen.
+
+Doc Kommentare sollten am besten als ganze Sätze formuliert werden, wodurch diese vielfältig automatisiert verwendet werden können. Der erste Satz sollte eine Zusammenfassung sein, welches mit dem Namen des Elements beginnt.
+
+```go
+// Compile parses a regular expression and returns, if successful,
+// a Regexp that can be used to match against text.
+func Compile(str string) (*Regexp, error) {
+```
+
+Wenn jeder doc Kommentar mit dem Namen des Elements beginnt, welchen er Beschreibt, kann der Output von `godoc` mit `grep` gut ausgewertet werden. Wenn man beispielsweise den Namen der Funktion "Compile" vergessen hat, aber nach der _parsing_ Funktion sucht, so kann man folgenden Befehl verwenden:
+
+```
+$ godoc regexp | grep -i parse
+```
+
+Wenn alle doc Kommentare mit "This function..." anfangen würden, wäre `grep` nicht in der Lage den Namen zu finden. Da aber jeder doc Kommentar mit dem gesuchten Namen beginnt, kann der Output wie folgt aussehen, welches gleich das gesuchte Wort beinhaltet:
+
+```
+$ godoc regexp | grep parse
+    Compile parses a regular expression and returns, if successful, a Regexp
+    parsed. It simplifies safe initialization of global variables holding
+    cannot be parsed. It simplifies safe initialization of global variables
+$
+```
+
+Die Go Syntax erlaubt es Deklarationen zu gruppieren.
